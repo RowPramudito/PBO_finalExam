@@ -40,8 +40,10 @@ public class MovieModel {
 
     public void updateData(String judul, double alur, double penokohan, double akting, double score) {
         try {
-            String query = "UPDATE `movie` SET title='" + judul + "',plot='" + alur + "',character='" + penokohan + "',acting='" + 
-            akting + "',score='" + score + "' WHERE title='" + judul;
+            System.out.println(judul);
+
+            String query = "UPDATE `movie` SET `title`='" + judul + "', `plot`='" + alur + "',`character`='" + penokohan + 
+            "',`acting`='" + akting + "',`score`='" + score + "' WHERE `movie`.`title`='" + judul + "'";
 
             stmt = conn.createStatement();
             stmt.executeUpdate(query);
