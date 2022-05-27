@@ -80,7 +80,7 @@ public class MovieController {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                movieModel.deleteData(getMovieTitle());;
+                movieModel.deleteData(getMovieTitle());
             }
             
         });
