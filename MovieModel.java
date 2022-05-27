@@ -1,91 +1,91 @@
 package moviereview;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.*;
+import java.sql.*;
+import javax.swing.JOptionPane;
 
-public class MovieController {
-    MovieModel movieModel;
-    MovieView movieView;
-    String movie_title;
+public class MovieModel {
+    String dbURL = "jdbc:mysql://localhost/movie_db";
+    String dbUsername = "root";
+    String dbPassword = "";
 
-    
-    public MovieController(MovieModel movieModel, MovieView movieView) {
-        this.movieModel = movieModel;
-        this.movieView = movieView;
-        
+    Connection conn; Statement stmt;
 
-        String movieData[][] = movieModel.readData();
-        movieView.table.setModel((new JTable(movieData, movieView.columnName)).getModel());
-
-        movieView.table.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                super.mouseClicked(e);
-                int row = movieView.table.getSelectedRow();
-                int col = movieView.table.getSelectedColumn();
-                
-                String movie_title = movieView.table.getValueAt(row, 0).toString();
-                System.out.println("data : " + movie_title);
-                setMovieTitle(movie_title);
-                System.out.println("data : " + getMovieTitle());
-            }
-        });
-
-        movieView.btnAdd.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String judul = movieView.getJudul(); 
-                String alur = movieView.getAlur(); double alurSc = Double.parseDouble(alur);
-                String penokohan = movieView.getPenokohan(); double penokohanSc = Double.parseDouble(penokohan);
-                String akting = movieView.getAkting(); double aktingSc = Double.parseDouble(akting);
-                
-                double scoreSc = (alurSc + penokohanSc + aktingSc) / 3;
-
-                movieModel.insertData(judul, alurSc, penokohanSc, aktingSc, scoreSc);
-            }
-            
-        });
-
-        movieView.btnUpdate.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String judul = movieView.getJudul(); 
-                String alur = movieView.getAlur(); double alurSc = Double.parseDouble(alur);
-                String penokohan = movieView.getPenokohan(); double penokohanSc = Double.parseDouble(penokohan);
-                String akting = movieView.getAkting(); double aktingSc = Double.parseDouble(akting);
-                
-                double scoreSc = (alurSc + penokohanSc + aktingSc) / 3;
-
-                movieModel.updateData(judul, alurSc, penokohanSc, aktingSc, scoreSc);
-            }
-            
-        });
-
-        movieView.btnReset.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String movieData[][] = movieModel.readData();
-                movieView.table.setModel((new JTable(movieData, movieView.columnName)).getModel());
-            }
-            
-        });
-
-        movieView.btnDelete.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                movieModel.deleteData(getMovieTitle());
-            }
-            
-        });
+    public MovieModel() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = (Connection) DriverManager.getConnection(dbURL, dbUsername, dbPassword);
+            System.out.println("Connection Successful");
+        } 
+        catch (Exception e) {
+            System.out.println("Connection Failed " + e.getMessage());
+        }
     }
 
-    void setMovieTitle(String movieTitle) {this.movie_title = movieTitle;}
-    String getMovieTitle() {return this.movie_title;}
+    public void insertData(String judul, double alur, double penokohan, double akting, double score) {
+        try {
+            String query = "INSERT INTO `movie` (`title`,`plot`,`character`,`acting`,`score`) " + 
+            "VALUES('" + judul + "','" + alur + "','" + penokohan + "','" + akting + "','" + score + "')";
+
+            stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+            JOptionPane.showMessageDialog(null, "Input Success");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Input Failed");
+        }
+    }
+
+    public void updateData(String judul, double alur, double penokohan, double akting, double score) {
+        try {
+            System.out.println(judul);
+
+            String query = "UPDATE `movie` SET `title`='" + judul + "', `plot`='" + alur + "',`character`='" + penokohan + 
+            "',`acting`='" + akting + "',`score`='" + score + "' WHERE `movie`.`title`='" + judul + "'";
+
+            stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+
+            JOptionPane.showMessageDialog(null, "Update Success");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Update Failed");
+        }
+    }
+
+
+    public String[][] readData() {
+        String data[][] = new String[100][5];
+
+        try {
+            int totalData = 0;
+            String query = "SELECT * FROM `movie`";
+            stmt = conn.createStatement();
+            ResultSet resultSet = stmt.executeQuery(query);
+
+            while(resultSet.next()) {
+                data[totalData][0] = resultSet.getString("title");
+                data[totalData][1] = resultSet.getString("plot");
+                data[totalData][2] = resultSet.getString("character");
+                data[totalData][3] = resultSet.getString("acting");
+                data[totalData][4] = resultSet.getString("score");
+                totalData++;
+            }
+            stmt.close();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("SQL Error");   
+        }
+        return data;
+    }
+
+    public void deleteData(String title) {
+        try {
+            String query = "DELETE FROM `movie` WHERE title = '" + title + "'";
+            stmt = conn.createStatement();
+            stmt.executeUpdate(query);
+            JOptionPane.showMessageDialog(null, "Delete Success");
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            JOptionPane.showMessageDialog(null, "Delete Failed");
+        }
+    }
 }
