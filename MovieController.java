@@ -28,9 +28,7 @@ public class MovieController {
                 int col = movieView.table.getSelectedColumn();
                 
                 String movie_title = movieView.table.getValueAt(row, 0).toString();
-                System.out.println("data : " + movie_title);
                 setMovieTitle(movie_title);
-                System.out.println("data : " + getMovieTitle());
             }
         });
 
