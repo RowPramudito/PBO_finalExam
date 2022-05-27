@@ -9,13 +9,30 @@ import javax.swing.*;
 public class MovieController {
     MovieModel movieModel;
     MovieView movieView;
+    String movie_title;
+
     
     public MovieController(MovieModel movieModel, MovieView movieView) {
         this.movieModel = movieModel;
         this.movieView = movieView;
+        
 
         String movieData[][] = movieModel.readData();
         movieView.table.setModel((new JTable(movieData, movieView.columnName)).getModel());
+
+        movieView.table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                int row = movieView.table.getSelectedRow();
+                int col = movieView.table.getSelectedColumn();
+                
+                String movie_title = movieView.table.getValueAt(row, 0).toString();
+                System.out.println("data : " + movie_title);
+                setMovieTitle(movie_title);
+                System.out.println("data : " + getMovieTitle());
+            }
+        });
 
         movieView.btnAdd.addActionListener(new ActionListener() {
 
@@ -63,10 +80,12 @@ public class MovieController {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO Auto-generated method stub
-                
+                movieModel.deleteData(getMovieTitle());;
             }
             
         });
     }
+
+    void setMovieTitle(String movieTitle) {this.movie_title = movieTitle;}
+    String getMovieTitle() {return this.movie_title;}
 }
